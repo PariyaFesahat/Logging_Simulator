@@ -50,10 +50,10 @@ containerdConfigPatches:
     endpoint = ["https://hub.hamdocker.ir"]
 
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."registry.k8s.io"]
-    endpoint = ["https://hub.hamdocker.ir"]
+    endpoint = ["https://k8s-mirror.liara.ir"]
 
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.elastic.co"]
-    endpoint = ["https://hub.hamdocker.ir"]
+    endpoint = ["https://elastic.hamdocker.ir"]
 
 nodes:
   - role: control-plane
