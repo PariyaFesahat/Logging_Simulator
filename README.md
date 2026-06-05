@@ -225,9 +225,39 @@ nginx-logs-YYYY.MM.DD
 # 13. View Sample Logs
 
 ```bash
-curl "http://localhost:9200/nginx-logs-*/_search?pretty&size=5"
+curl "http://localhost:9200/nginx-logs-*/_search?pretty"
 ```
-![log](.\Images\log_result.png)
+<img src="ّmages/idx_result.png" width="600">
+---
+
+# 14. View error Logs
+```bash
+curl -X GET "http://localhost:9201/nginx-logs-*/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match": {
+      "stream": "stderr"
+    }
+  }
+}
+'
+```
+<img src="ّmages/stderr.png" width="600">
+---
+
+# 15. View stdout Logs
+```bash
+curl -X GET "http://localhost:9201/nginx-logs-*/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match": {
+      "stream": "stdout"
+    }
+  }
+}
+'
+```
+<img src="ّmages/stdout.png" width="600">
 ---
 
 # Result
