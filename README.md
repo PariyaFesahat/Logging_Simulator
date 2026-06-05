@@ -56,8 +56,9 @@ kind --version
 # 4. Create Kind Cluster with Registry Mirrors
 
 ```bash
-nano [kind-config.yaml](.\Configs\kind-config.yaml)
+nano kind-config.yaml
 ```
+[kind-config.yaml](.\Configs\kind-config.yaml)
 
 ```yaml
 kind: Cluster
@@ -91,9 +92,10 @@ kubectl get nodes
 ---
 
 # 5. Install Ingress NGINX
+[ingress.yaml](.\Configs\ingress.yaml)
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.0/deploy/static/provider/kind/deploy.yaml
+kubectl apply -f ingress.yaml
 ```
 
 Wait until ready:
@@ -114,8 +116,10 @@ kubectl create namespace logging
 
 # 7. Deploy Elasticsearch (Single Node)
 
+[elasticsearch.yaml](.\Configs\elasticsearch.yaml)
+
 ```bash
-kubectl apply -n logging -f https://raw.githubusercontent.com/elastic/elasticsearch/master/docs/examples/k8s/elasticsearch-single.yaml
+kubectl apply -n logging -f elasticsearch.yaml
 ```
 
 Check pods:
@@ -141,37 +145,17 @@ curl http://localhost:9200
 # 8. Configure Logstash
 
 Create ConfigMap:
+[logstash-configmap.yaml](.\Configs\logstash-configmap.yaml)
 
 ```bash
-kubectl apply -n logging -f - <<EOF
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: logstash-configmap
-  namespace: logging
-
-data:
-  logstash.conf: |
-    input {
-      beats {
-        port => 5000
-      }
-    }
-
-    output {
-      elasticsearch {
-        hosts => ["http://elasticsearch.logging.svc.cluster.local:9200"]
-        index => "nginx-logs-%{+YYYY.MM.dd}"
-      }
-      stdout { codec => rubydebug }
-    }
-EOF
+kubectl apply -n logging -f logstash-configmap.yaml
 ```
 
 Deploy Logstash:
 
+[logstash.yaml](.\Configs\logstash.yaml)
 ```bash
-kubectl apply -n logging -f https://raw.githubusercontent.com/elastic/logstash/master/docs/static/k8s/logstash-deployment.yaml
+kubectl apply -n logging -f logstash.yaml
 ```
 
 Restart if needed:
@@ -184,8 +168,9 @@ kubectl rollout restart deployment logstash -n logging
 
 # 9. Deploy Filebeat (DaemonSet)
 
+[filebeat.yaml](.\Configs\filebeat.yaml)
 ```bash
-kubectl apply -n logging -f https://raw.githubusercontent.com/elastic/beats/master/deploy/kubernetes/filebeat-kubernetes.yaml
+kubectl apply -n logging -f filebeat.yaml
 ```
 
 Check:
@@ -217,6 +202,9 @@ Send multiple HTTP requests:
 ```bash
 for i in {1..20}; do curl http://localhost > /dev/null; done
 ```
+```bash
+for i in {1..20}; do curl http://localhost/error > /dev/null; done
+```
 
 ---
 
@@ -239,7 +227,7 @@ nginx-logs-YYYY.MM.DD
 ```bash
 curl "http://localhost:9200/nginx-logs-*/_search?pretty&size=5"
 ```
-
+![log](.\Images\log_result.png)
 ---
 
 # Result
