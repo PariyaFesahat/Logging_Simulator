@@ -58,7 +58,7 @@ kind --version
 ```bash
 nano kind-config.yaml
 ```
-[kind-config.yaml](Configs\kind-config.yaml)
+[kind-config.yaml](/Configs/kind-config.yaml)
 
 ```yaml
 kind: Cluster
@@ -92,7 +92,7 @@ kubectl get nodes
 ---
 
 # 5. Install Ingress NGINX
-[ingress.yaml](Configs\ingress.yaml)
+[ingress.yaml](/Configs/ingress.yaml)
 
 ```bash
 kubectl apply -f ingress.yaml
@@ -116,7 +116,7 @@ kubectl create namespace logging
 
 # 7. Deploy Elasticsearch (Single Node)
 
-[elasticsearch.yaml](Configs\elasticsearch.yaml)
+[elasticsearch.yaml](/Configs/elasticsearch.yaml)
 
 ```bash
 kubectl apply -n logging -f elasticsearch.yaml
@@ -146,7 +146,7 @@ curl http://localhost:9200
 
 Create ConfigMap:
 
-[logstash-configmap.yaml](Configs\logstash-configmap.yaml)
+[logstash-configmap.yaml](/Configs/logstash-configmap.yaml)
 
 ```bash
 kubectl apply -n logging -f logstash-configmap.yaml
@@ -154,7 +154,7 @@ kubectl apply -n logging -f logstash-configmap.yaml
 
 Deploy Logstash:
 
-[logstash.yaml](Configs\logstash.yaml)
+[logstash.yaml](/Configs/logstash.yaml)
 ```bash
 kubectl apply -n logging -f logstash.yaml
 ```
@@ -169,7 +169,7 @@ kubectl rollout restart deployment logstash -n logging
 
 # 9. Deploy Filebeat (DaemonSet)
 
-[filebeat.yaml](Configs\filebeat.yaml)
+[filebeat.yaml](/Configs/filebeat.yaml)
 ```bash
 kubectl apply -n logging -f filebeat.yaml
 ```
@@ -228,7 +228,7 @@ nginx-logs-YYYY.MM.DD
 ```bash
 curl "http://localhost:9200/nginx-logs-*/_search?pretty"
 ```
-<img src="ّImages\idx_result.png" width="600">
+<img src="ّ/Images/idx_result.png" width="600">
 ---
 
 # 14. View error Logs
@@ -243,7 +243,7 @@ curl -X GET "http://localhost:9201/nginx-logs-*/_search?pretty" -H 'Content-Type
 }
 '
 ```
-<img src="ّImages\stderr.png" width="600">
+<img src="ّ/Images/stderr.png" width="600">
 ---
 
 # 15. View stdout Logs
@@ -258,7 +258,7 @@ curl -X GET "http://localhost:9201/nginx-logs-*/_search?pretty" -H 'Content-Type
 }
 '
 ```
-<img src="ّImages\stdout.png" width="600">
+<img src="ّ/Images/stdout.png" width="600">
 ---
 
 # Result
