@@ -228,7 +228,9 @@ nginx-logs-YYYY.MM.DD
 ```bash
 curl "http://localhost:9200/nginx-logs-*/_search?pretty"
 ```
-<img src="ّ/Images/idx_result.png" width="600">
+<p align="center">
+  <img src="Images/idx_result.png" width="600">
+</p>
 ---
 
 # 14. View error Logs
@@ -243,7 +245,9 @@ curl -X GET "http://localhost:9201/nginx-logs-*/_search?pretty" -H 'Content-Type
 }
 '
 ```
-<img src="ّ/Images/stderr.png" width="600">
+<p align="center">
+  <img src="Images/stderr.png" width="600">
+</p>
 ---
 
 # 15. View stdout Logs
@@ -258,7 +262,9 @@ curl -X GET "http://localhost:9201/nginx-logs-*/_search?pretty" -H 'Content-Type
 }
 '
 ```
-<img src="ّ/Images/stdout.png" width="600">
+<p align="center">
+  <img src="Images/stdout.png" width="600">
+</p>
 ---
 
 # Result
