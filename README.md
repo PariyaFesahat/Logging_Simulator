@@ -1,47 +1,65 @@
-Kind + ELK Kubernetes Setup Guide
 
-Kubernetes Kind + Ingress + ELK Stack
+# Kubernetes Kind + Ingress + ELK Logging Stack
 
-Short, command-focused setup guide for Ubuntu 26.04.
+Short command‑focused guide for setting up a local Kubernetes lab using **Kind**, configuring **registry mirrors**, installing **Ingress‑NGINX**, and deploying a basic **ELK logging pipeline (Elasticsearch, Logstash, Filebeat)**.
 
+Tested on: Ubuntu 26.04
 
+---
 
-1. Install Docker
+# 1. Install Docker
 
+```bash
 sudo apt update
 sudo apt install -y docker.io
 sudo systemctl enable --now docker
+```
 
+---
 
+# 2. Configure Docker Registry Mirror
 
+```bash
+sudo nano /etc/docker/daemon.json
+```
 
-2. Configure Docker Registry Mirrors
-
-sudo bash -c 'cat > /etc/docker/daemon.json <<EOF
+```json
 {
   "registry-mirrors": [
     "https://hub.hamdocker.ir"
   ]
 }
-EOF'
+```
 
+```bash
 sudo systemctl restart docker
+```
 
+---
 
+# 3. Install Kind
 
-
-3. Install Kind
-
+```bash
 curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/latest/download/kind-linux-amd64
 chmod +x kind
 sudo mv kind /usr/local/bin/
+```
 
+Verify:
 
+```bash
+kind --version
+```
 
+---
 
-4. Create Kind Cluster (with containerd mirrors)
+# 4. Create Kind Cluster with Registry Mirrors
 
-cat <<EOF > kind-config.yaml
+```bash
+nano [kind-config.yaml](.\Configs\kind-config.yaml)
+```
+
+```yaml
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
@@ -54,64 +72,84 @@ containerdConfigPatches:
 
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.elastic.co"]
     endpoint = ["https://elastic.hamdocker.ir"]
-
 nodes:
   - role: control-plane
-EOF
+```
 
+Create cluster:
 
+```bash
 kind create cluster --config kind-config.yaml
+```
 
+Check nodes:
 
+```bash
+kubectl get nodes
+```
 
+---
 
-5. Install Ingress-NGINX
+# 5. Install Ingress NGINX
 
+```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.0/deploy/static/provider/kind/deploy.yaml
+```
 
+Wait until ready:
 
-kubectl wait --namespace ingress-nginx \
-  --for=condition=ready pod \
-  --timeout=120s \
-  -l app.kubernetes.io/component=controller
+```bash
+kubectl wait --namespace ingress-nginx   --for=condition=ready pod   --selector=app.kubernetes.io/component=controller   --timeout=120s
+```
 
+---
 
+# 6. Create Logging Namespace
 
-
-6. Create Logging Namespace
-
+```bash
 kubectl create namespace logging
+```
 
+---
 
+# 7. Deploy Elasticsearch (Single Node)
 
-
-7. Deploy Elasticsearch (Single Node)
-
+```bash
 kubectl apply -n logging -f https://raw.githubusercontent.com/elastic/elasticsearch/master/docs/examples/k8s/elasticsearch-single.yaml
+```
 
+Check pods:
 
-Port forward:
+```bash
+kubectl get pods -n logging
+```
 
-kubectl port-forward svc/elasticsearch -n logging 9201:9200
+Port‑forward:
 
+```bash
+kubectl port-forward svc/elasticsearch -n logging 9200:9200
+```
 
 Test:
 
-curl http://localhost:9201
+```bash
+curl http://localhost:9200
+```
 
+---
 
+# 8. Configure Logstash
 
+Create ConfigMap:
 
-8. Deploy Logstash
-
-ConfigMap (Beats input required)
-
+```bash
 kubectl apply -n logging -f - <<EOF
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: logstash-configmap
   namespace: logging
+
 data:
   logstash.conf: |
     input {
@@ -128,91 +166,96 @@ data:
       stdout { codec => rubydebug }
     }
 EOF
+```
 
+Deploy Logstash:
 
-Restart:
+```bash
+kubectl apply -n logging -f https://raw.githubusercontent.com/elastic/logstash/master/docs/static/k8s/logstash-deployment.yaml
+```
 
+Restart if needed:
+
+```bash
 kubectl rollout restart deployment logstash -n logging
+```
 
+---
 
+# 9. Deploy Filebeat (DaemonSet)
 
-
-9. Deploy Filebeat (DaemonSet)
-
+```bash
 kubectl apply -n logging -f https://raw.githubusercontent.com/elastic/beats/master/deploy/kubernetes/filebeat-kubernetes.yaml
+```
 
+Check:
 
+```bash
+kubectl get pods -n logging
+```
 
+---
 
-10. Test Logstash Connectivity
+# 10. Test Logstash Connectivity
 
-kubectl run test --rm -it --image=busybox --restart=Never -- \
-  nc -zv logstash.logging.svc.cluster.local 5000
+```bash
+kubectl run test --rm -it --image=busybox --restart=Never -- nc -zv logstash.logging.svc.cluster.local 5000
+```
 
+Expected output:
+
+```
+open
+```
+
+---
+
+# 11. Generate NGINX Logs
+
+Send multiple HTTP requests:
+
+```bash
+for i in {1..20}; do curl http://localhost > /dev/null; done
+```
+
+---
+
+# 12. Verify Elasticsearch Indices
+
+```bash
+curl http://localhost:9200/_cat/indices?v
+```
 
 Expected:
 
-open
-
-
-
-
-11. Generate Logs (NGINX)
-
-for i in {1..20}; do curl -s http://localhost > /dev/null; done
-
-
-
-
-12. Verify Elasticsearch Index
-
-curl http://localhost:9201/_cat/indices?v
-
-
-Expected index:
-
+```
 nginx-logs-YYYY.MM.DD
+```
 
+---
 
-View logs:
+# 13. View Sample Logs
 
-curl "http://localhost:9201/nginx-logs-*/_search?size=5&pretty"
+```bash
+curl "http://localhost:9200/nginx-logs-*/_search?pretty&size=5"
+```
 
+---
 
+# Result
 
+Working pipeline:
 
-Result
+```
+NGINX → Filebeat → Logstash → Elasticsearch
+```
 
+Components deployed:
 
+- Kind Kubernetes cluster
+- Registry mirrors
+- Ingress NGINX
+- Elasticsearch
+- Logstash (Beats input)
+- Filebeat DaemonSet
 
-
-
-Kind cluster running
-
-
-
-Registry mirrors configured
-
-
-
-Ingress-NGINX working
-
-
-
-Elasticsearch deployed
-
-
-
-Logstash (Beats input) connected
-
-
-
-Filebeat shipping container logs
-
-
-
-Logs indexed in Elasticsearch
-
-
-
-End of Guide
