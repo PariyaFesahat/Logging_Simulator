@@ -145,6 +145,7 @@ curl http://localhost:9200
 # 8. Configure Logstash
 
 Create ConfigMap:
+
 [logstash-configmap.yaml](.\Configs\logstash-configmap.yaml)
 
 ```bash
@@ -227,7 +228,7 @@ nginx-logs-YYYY.MM.DD
 ```bash
 curl "http://localhost:9200/nginx-logs-*/_search?pretty"
 ```
-<img src="ّmages/idx_result.png" width="600">
+<img src="ّImages/idx_result.png" width="600">
 ---
 
 # 14. View error Logs
@@ -242,7 +243,7 @@ curl -X GET "http://localhost:9201/nginx-logs-*/_search?pretty" -H 'Content-Type
 }
 '
 ```
-<img src="ّmages/stderr.png" width="600">
+<img src="ّImages/stderr.png" width="600">
 ---
 
 # 15. View stdout Logs
@@ -257,7 +258,7 @@ curl -X GET "http://localhost:9201/nginx-logs-*/_search?pretty" -H 'Content-Type
 }
 '
 ```
-<img src="ّmages/stdout.png" width="600">
+<img src="ّImages/stdout.png" width="600">
 ---
 
 # Result
