@@ -75,6 +75,7 @@ containerdConfigPatches:
     endpoint = ["https://elastic.hamdocker.ir"]
 nodes:
   - role: control-plane
+  - role: worker
 ```
 
 Create cluster:
